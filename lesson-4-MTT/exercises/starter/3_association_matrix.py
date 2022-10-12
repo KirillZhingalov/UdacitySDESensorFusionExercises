@@ -5,34 +5,6 @@ matplotlib.use('wxagg') # change backend so that figure maximizing works on Mac 
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 
-class Association:
-    '''Data association class with single nearest neighbor association and gating based on Mahalanobis distance'''
-    def __init__(self):
-        self.association_matrix = np.matrix([])
-        
-    def associate(self, track_list, meas_list):
-        N = len(track_list) # N tracks
-        M = len(meas_list) # M measurements
-        
-        # initialize association matrix
-        self.association_matrix = np.inf*np.ones((N,M)) 
-
-        ############
-        # TODO: fill association matrix with Mahalanobis distances between all tracks and all measurements
-        ############
-        
-    def MHD(self, track, meas):
-        # calc Mahalanobis distance
-
-        ############
-        # TODO: Calculate and return Mahalanobis distance between track and meas. 
-        # You will also need to implement the measurement matrix H for 2D lidar measurements.
-        # Note that the track is already given in sensor coordinates here, no transformation needed.
-        ############
-        
-        return 0
-    
-
 ################## 
 class Track:
     '''Track class with state, covariance, id'''
@@ -65,7 +37,37 @@ class Measurement:
         # set up measurement covariance
         self.R = np.matrix([[2, 0],
                         [0, 2]])
-         
+
+class Association:
+    '''Data association class with single nearest neighbor association and gating based on Mahalanobis distance'''
+    def __init__(self):
+        self.association_matrix = np.matrix([])
+        
+    def associate(self, track_list, meas_list):
+        N = len(track_list) # N tracks
+        M = len(meas_list) # M measurements
+        
+        # initialize association matrix
+        self.association_matrix = np.inf*np.ones((N,M)) 
+
+        # loop over all tracks and all measurements to set up association matrix
+        for i in range(N): 
+            track = track_list[i]
+            for j in range(M):
+                meas = meas_list[j]
+                dist = self.MHD(track, meas)
+                self.association_matrix[i,j] = dist
+
+        
+    def MHD(self, track: Track, meas: Measurement):
+        # calc Mahalanobis distance
+        H = np.matrix([[1, 0, 0, 0],
+                       [0, 1, 0, 0]]) 
+        gamma = meas.z - H*track.x
+        S = H*track.P*H.transpose() + meas.R
+        MHD = gamma.transpose()*np.linalg.inv(S)*gamma # Mahalanobis distance formula
+        return MHD
+
     
 #################
 def run():

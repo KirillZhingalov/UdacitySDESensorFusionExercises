@@ -5,21 +5,7 @@ matplotlib.use('wxagg') # change backend so that figure maximizing works on Mac 
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 
-class Track:
-    '''Track class with state, covariance, id'''
-    def __init__(self, meas, id):
-        print('creating track no.', id)
-        self.id = id
-        self.x = np.zeros((6,1))
-        self.P = np.zeros((6,6))
 
-        ############
-        # TODO: initialize self.x and self.P from measurement z and R, don't forget coordinate transforms
-        ############
-        
-        
-###################  
-        
 class Measurement:
     '''Lidar measurement class including measurement z, covariance R, coordinate transform matrix'''
     def __init__(self, gt, phi, t):
@@ -50,7 +36,26 @@ class Measurement:
         self.R = np.matrix([[sigma_lidar_x**2, 0, 0], # measurement noise covariance matrix
                             [0, sigma_lidar_y**2, 0], 
                             [0, 0, sigma_lidar_z**2]])
-        
+
+class Track:
+    '''Track class with state, covariance, id'''
+    def __init__(self, meas: Measurement, id):
+        print('creating track no.', id)
+        self.id = id
+        self.x = np.zeros((6,1))
+        self.P = np.zeros((6,6))
+
+        z = np.ones((4, 1))
+        z[:3] = meas.z
+        self.x[:3] = (meas.sens_to_veh @ z)[:3]
+
+        M_rot = meas.sens_to_veh[:3, :3]
+        R = meas.R
+        P_pos = (M_rot @ R) @ M_rot.T
+        P_vel = np.identity(3) * 1000.
+        self.P[:3, :3] = P_pos
+        self.P[3:, 3:] = P_vel
+
 def visualize(track, meas):
     fig, (ax1, ax2, ax3) = plt.subplots(1,3)
     ax1.scatter(-meas.z[1], meas.z[0], marker='o', color='blue', label='measurement')

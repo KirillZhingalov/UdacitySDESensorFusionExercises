@@ -11,9 +11,11 @@ class Camera:
         self.fov = [-np.pi/4, np.pi/4] # sensor field of view / opening angle
         
         # compute rotation around z axis
-        M_rot = np.matrix([[np.cos(phi), -np.sin(phi), 0],
-                    [np.sin(phi), np.cos(phi), 0],
-                    [0, 0, 1]])
+        M_rot = np.matrix([
+            [np.cos(phi), -np.sin(phi), 0],
+            [np.sin(phi), np.cos(phi), 0],
+            [0, 0, 1]
+        ])
         
         # coordiante transformation matrix from sensor to vehicle coordinates
         self.sens_to_veh = np.matrix(np.identity(4))            
@@ -24,12 +26,14 @@ class Camera:
     def in_fov(self, x):
         # check if an object x can be seen by this sensor
 
-        ############
-        # TODO: Return True if x lies in sensor's field of view, otherwise return False. 
-        # Don't forget to transform from vehicle to sensor coordinates.
-        ############
-            
-        return False
+        z_veh = np.ones((4, 1))
+        z_veh[:3] = x[:3]
+
+        p_sens = self.veh_to_sens @ z_veh
+
+        angle = np.arctan(p_sens[1] / p_sens[0])
+
+        return self.fov[0] < angle < self.fov[1]
         
 #################
 def run():
