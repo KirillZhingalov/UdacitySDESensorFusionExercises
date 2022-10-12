@@ -26,10 +26,6 @@ class Filter:
     def predict(self, x: np.matrix, P: np.matrix) -> tp.Tuple[np.matrix, np.matrix]:
         # predict state and estimation error covariance to next timestep
 
-        ############
-        # TODO: implement prediction step
-        ############
-
         x = self.F @ x
         P = (self.F @ P) @ self.F.T + self.Q
         
@@ -38,10 +34,6 @@ class Filter:
     def update(self, x: np.matrix, P: np.matrix, 
                      z: np.matrix, R: np.matrix) -> tp.Tuple[np.matrix, np.matrix]:
         # update state and covariance with associated measurement
-
-        ############
-        # TODO: implement update step
-        ############
 
         residual_gamma = z - self.H @ x       # Residual (error) between measurement and pred
         S = (self.H @ P) @ self.H.T + R       # Cov of residuals (errors)

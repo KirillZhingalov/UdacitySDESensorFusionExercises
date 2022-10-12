@@ -10,32 +10,34 @@ class Filter:
         self.dt = 0.1 # time increment
         self.q = 0.1 # process noise variable for Kalman filter Q
 
-    def F(self):
+    def F(self) -> np.ndarray:
         # system matrix
 
-        ############
-        # TODO: implement and return F
-        ############
-        
-        pass
+        F_mat = np.identity(4)
+        F_mat[0, 2] = self.dt
+        F_mat[1, 3] = self.dt
 
-    def Q(self):
+        return F_mat
+        
+    def Q(self) -> np.ndarray:
         # process noise covariance Q
-
-        ############
-        # TODO: implement and return Q
-        ############
-        
-        pass
+        Q_mat = np.zeros((4, 4))
+        Q_mat[0, 0] = 1/3 * self.dt**3 * self.q
+        Q_mat[0, 2] = 1/2 * self.dt**2 * self.q
+        Q_mat[1, 1] = 1/3 * self.dt**3 * self.q
+        Q_mat[1, 3] = 1/2 * self.dt**2 * self.q
+        Q_mat[2, 0] = 1/2 * self.dt**2 * self.q
+        Q_mat[2, 2] = self.dt * self.q
+        Q_mat[3, 1] = 1/2 * self.dt**2 * self.q
+        Q_mat[3, 3] = self.dt * self.q
+        return Q_mat
     
-    def H(self):
-        # measurement matrix H
+    def H(self) -> np.ndarray:
+        H_mat = np.zeros((2, 4))
+        H_mat[0, 0] = 1
+        H_mat[1, 1] = 1
 
-        ############
-        # TODO: implement and return H
-        ############
-    
-        pass
+        return H_mat
     
     def predict(self, x, P):
         # predict state and estimation error covariance to next timestep
